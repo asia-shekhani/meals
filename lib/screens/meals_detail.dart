@@ -11,9 +11,9 @@ class MealsDetail extends ConsumerWidget {
   final Meal meal;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final favoriteMeals=ref.watch(favoritesMealsProvider);
-    final isFavorite=favoriteMeals.contains(meal);
-    
+    final favoriteMeals = ref.watch(favoritesMealsProvider);
+    final isFavorite = favoriteMeals.contains(meal);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -22,26 +22,41 @@ class MealsDetail extends ConsumerWidget {
         actions: [
           IconButton(
             onPressed: () {
-                final wasAdded=ref
+              final wasAdded = ref
                   .read(favoritesMealsProvider.notifier)
                   .toggleMealFavoriteStatus(meal);
               ScaffoldMessenger.of(context).clearSnackBars();
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(content: Text(wasAdded?'Meal added as Favorite':'Meal removed from Favorite')));
-            
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(wasAdded
+                      ? 'Meal added as Favorite'
+                      : 'Meal removed from Favorite')));
             },
-            icon: Icon(isFavorite ? Icons.star:Icons.star_border),
+            icon: AnimatedSwitcher(
+              transitionBuilder: (child, animation) {
+                return RotationTransition(
+                  //Tween(begin: 0.5, end: 1 this is an issue becuase it should be double either should both be double (has .0) or write <double>
+                  turns: Tween(begin: 0.8, end: 1.0).animate(animation),
+                  child: child,
+                );
+              },
+              duration: Duration(milliseconds: 300),
+              key: ValueKey(isFavorite),
+              child: Icon(isFavorite ? Icons.star : Icons.star_border),
+            ),
           ),
         ],
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Image.network(
-              meal.imageUrl,
-              width: double.infinity,
-              height: 300,
-              fit: BoxFit.cover,
+            Hero(
+              tag: meal.id,
+              child: Image.network(
+                meal.imageUrl,
+                width: double.infinity,
+                height: 300,
+                fit: BoxFit.cover,
+              ),
             ),
             const SizedBox(
               height: 5,
